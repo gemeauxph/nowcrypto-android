@@ -6,7 +6,7 @@ import io.nowcrypto.library.remote.payment.PaymentResponse
 class PayViaCryptoUseCase(
     private val repository: PaymentRepository
 ) {
-    suspend fun execute(apiKey: String, paymentRequestToken: String): PaymentResponse {
-        return repository.payViaCrypto(apiKey, paymentRequestToken)
+    suspend fun execute(deviceId: String, apiKey: String, paymentRequestToken: String): PaymentResponse {
+        return repository.payViaCrypto(deviceId, apiKey, paymentRequestToken)
     }
 }

@@ -11,8 +11,8 @@ class PaymentRepositoryImpl(
     private val paymentApi: PaymentApi,
     private val transactionIdPaymentApi: TransactionIdPaymentApi
 ) : PaymentRepository {
-    override suspend fun payViaCrypto(apiKey: String, paymentRequestToken: String): PaymentResponse {
-        return paymentApi.payViaCrypto(PaymentRequest(apiKey, paymentRequestToken ))
+    override suspend fun payViaCrypto(deviceId: String, apiKey: String, paymentRequestToken: String): PaymentResponse {
+        return paymentApi.payViaCrypto(PaymentRequest(deviceId, apiKey, paymentRequestToken ))
     }
 
     override suspend fun payViaTransactionId(

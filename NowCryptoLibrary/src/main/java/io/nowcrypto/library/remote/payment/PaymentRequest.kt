@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 
 @Keep
 data class PaymentRequest(
+    val deviceId: String,
     val apiKey: String,
     val paymentRequestToken: String,
 )

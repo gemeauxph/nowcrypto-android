@@ -397,7 +397,7 @@ class PaymentViewModel @Inject constructor(
         viewModelScope.launch {
             _paymentUiState.value = PaymentUiState.PaymentLoading
             try {
-                val result = payViaCryptoUseCase.execute(apiKey!!,paymentRequestToken)
+                val result = payViaCryptoUseCase.execute(deviceIdProvider.getDeviceId(), apiKey!!, paymentRequestToken)
                 Log.d("PaymentViewModel", "Payment fetch result: $result")
 
                 if (result.success) {
