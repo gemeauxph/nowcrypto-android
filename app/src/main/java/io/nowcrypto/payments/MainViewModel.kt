@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import io.nowcrypto.library.NowCrypto
 import io.nowcrypto.library.data.NowCryptoResult
 import io.nowcrypto.library.remote.payment_status.PaymentStatusResponse
+import io.nowcrypto.library.remote.subscription.ActiveSubscriptionResult
 import io.nowcrypto.library.remote.subscription.NowCryptoSubscriptionItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +52,11 @@ class MainViewModel : ViewModel() {
 
     private var _subscriptionList = MutableStateFlow<List<NowCryptoSubscriptionItem>?>(null)
     val subscriptionList: StateFlow<List<NowCryptoSubscriptionItem>?> = _subscriptionList
+
+    private val _activeSubscriptionResult =
+        MutableStateFlow<ActiveSubscriptionResult?>(null)
+
+    val activeSubscriptionResult: StateFlow<ActiveSubscriptionResult?> = _activeSubscriptionResult
 
     fun setSubscriptionId(id: String?) {
         _subId.value = id
@@ -181,6 +187,30 @@ class MainViewModel : ViewModel() {
                     _paymentStatus.value = null
                     onError()
                 }
+                is NowCryptoResult.Loading -> {}
+            }
+        }
+    }
+
+    fun getActiveSubscription(context: Context, onError: () -> Unit) {
+
+        isLoading = true
+        notifMessage = null
+
+        NowCrypto.queryActiveSubscription(context) { result ->
+            isLoading = false
+
+            when (result) {
+                is NowCryptoResult.Success -> {
+                    _activeSubscriptionResult.value = result.data
+                }
+
+                is NowCryptoResult.Error -> {
+                    notifMessage = result.message
+                    _activeSubscriptionResult.value = null
+                    onError()
+                }
+
                 is NowCryptoResult.Loading -> {}
             }
         }

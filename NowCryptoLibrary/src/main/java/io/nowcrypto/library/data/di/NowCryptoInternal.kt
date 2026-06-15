@@ -28,6 +28,7 @@ import io.nowcrypto.library.domain.add_fund.AddFundUseCase
 import io.nowcrypto.library.domain.balance.FetchUserBalanceUseCase
 import io.nowcrypto.library.domain.confirm_block.ConfirmBlockUseCase
 import io.nowcrypto.library.domain.currency.CurrencyUseCase
+import io.nowcrypto.library.domain.device_id.DeviceIdProvider
 import io.nowcrypto.library.domain.device_id.GetUserDetailsUseCase
 import io.nowcrypto.library.domain.device_id.SendDeviceIdUseCase
 import io.nowcrypto.library.domain.login.LoginUseCase
@@ -60,7 +61,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "session_prefs")
 
-internal class NowCryptoInternal(context: Context) {
+internal class NowCryptoInternal private constructor(context: Context) {
 
     // Storage
     val sessionManager: SessionManager by lazy {
@@ -69,7 +70,8 @@ internal class NowCryptoInternal(context: Context) {
 
     // Network
     private val moshi: Moshi by lazy {
-        Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        // addLast for optimal Kotlin reflection support
+        Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
     }
 
     private val okHttpClient: OkHttpClient by lazy {
@@ -142,11 +144,11 @@ internal class NowCryptoInternal(context: Context) {
 
     companion object {
         @Volatile
-        private var instance: NowCryptoInternal? = null
+        private var INSTANCE: NowCryptoInternal? = null
 
         fun getInstance(context: Context): NowCryptoInternal {
-            return instance ?: synchronized(this) {
-                instance ?: NowCryptoInternal(context).also { instance = it }
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: NowCryptoInternal(context.applicationContext).also { INSTANCE = it }
             }
         }
     }

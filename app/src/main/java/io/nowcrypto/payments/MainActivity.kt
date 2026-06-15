@@ -72,6 +72,8 @@ fun PaymentRequestScreen(
     val currentTrxId by viewModel.trxId.collectAsState()
     val statusResponse by viewModel.paymentStatus.collectAsState()
 
+    val activeSubscriptionResponse by viewModel.activeSubscriptionResult.collectAsState()
+
     // Subscription State
     var isSubscriptionChecked by remember { mutableStateOf(false) }
     var selectedSubscription by remember { mutableStateOf<NowCryptoSubscriptionItem?>(null) }
@@ -390,6 +392,90 @@ fun PaymentRequestScreen(
                                     enabled = !viewModel.isLoading
                                 ) {
                                     Text("CHECK PAYMENT STATUS")
+                                }
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    color = Color.DarkGray
+                                )
+
+                                Button(
+                                    onClick = { viewModel.getActiveSubscription(context) {} },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF4CAF50)
+                                    ),
+                                    enabled = !viewModel.isLoading
+                                ) {
+                                    Text("CHECK ACTIVE SUBSCRIPTIONS")
+                                }
+
+                                activeSubscriptionResponse?.let { result ->
+
+                                    Column(
+                                        modifier = Modifier.padding(top = 12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                "Has Active Subscription: ",
+                                                color = Color.LightGray
+                                            )
+
+                                            Text(
+                                                text = if (result.hasActiveSubscription) "YES" else "NO",
+                                                color = if (result.hasActiveSubscription)
+                                                    Color.Green
+                                                else
+                                                    Color.Red,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+
+                                        if (result.subscriptions.isEmpty()) {
+
+                                            Text(
+                                                text = "No subscriptions found",
+                                                color = Color.Gray
+                                            )
+
+                                        } else {
+
+                                            result.subscriptions.forEach { subscription ->
+
+                                                Card(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    colors = CardDefaults.cardColors(
+                                                        containerColor = Color(0xFF252525)
+                                                    )
+                                                ) {
+                                                    Column(
+                                                        modifier = Modifier.padding(12.dp),
+                                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                    ) {
+
+                                                        Text(
+                                                            "Transaction ID: ${subscription.trxId}",
+                                                            color = Color.White
+                                                        )
+
+                                                        Text(
+                                                            "Status: ${subscription.status}",
+                                                            color = Color.White
+                                                        )
+
+                                                        Text(
+                                                            "Expiration: ${subscription.expiration}",
+                                                            color = Color.White
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 statusResponse?.let { res ->

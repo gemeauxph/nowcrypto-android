@@ -2,6 +2,7 @@ package io.nowcrypto.library
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import io.nowcrypto.library.data.NowCryptoResult
 import io.nowcrypto.library.presentation.MainActivity
 import io.nowcrypto.library.remote.payment_status.PaymentStatusResponse
@@ -9,6 +10,8 @@ import io.nowcrypto.library.remote.subscription.NowCryptoSubscriptionItem
 import io.nowcrypto.library.domain.device_id.DeviceIdProvider
 import io.nowcrypto.library.remote.subscription.NowCryptoSubscription
 import io.nowcrypto.library.data.di.NowCryptoInternal
+import io.nowcrypto.library.data.di.device_id.AndroidDeviceIdProvider
+import io.nowcrypto.library.remote.subscription.ActiveSubscriptionResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +20,6 @@ import kotlinx.coroutines.withContext
 object NowCrypto {
     private var paymentResultListener: PaymentResultListener? = null
     private var _publicKey: String? = null
-    private var deviceIdProvider: DeviceIdProvider? = null
 
     /**
      * Initialize the library once with your public API key.
@@ -25,15 +27,6 @@ object NowCrypto {
      */
     fun init(publicKey: String) {
         this._publicKey = publicKey
-    }
-
-    internal fun inject(deviceIdProvider: DeviceIdProvider) {
-        this.deviceIdProvider = deviceIdProvider
-    }
-
-    fun getDeviceId(): String {
-        return deviceIdProvider?.getDeviceId()
-            ?: throw IllegalStateException("DeviceIdProvider not injected")
     }
 
     /**
@@ -283,9 +276,9 @@ object NowCrypto {
      */
     fun queryActiveSubscription(
         context: Context,
-        onResult: (NowCryptoResult<List<NowCryptoSubscription>>) -> Unit
+        onResult: (NowCryptoResult<ActiveSubscriptionResult>) -> Unit
     ) {
-
+        Log.d("CryptoDebug", "start")
         // Fail fast if the developer forgot to call NowCrypto.init()
         val publicKey = try {
             getRequiredPublicKey()
@@ -294,17 +287,31 @@ object NowCrypto {
             return
         }
 
-        // Access internal dependencies
         val internal = NowCryptoInternal.getInstance(context)
         val getQueryActiveSubscriptionUseCase = internal.queryActiveSubscriptionUseCase
 
+        val deviceId = try {
+            internal.deviceIdProvider.getDeviceId()
+        } catch (e: Exception) {
+            onResult(NowCryptoResult.Error(message = e.message ?: "Device ID not found"))
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = getQueryActiveSubscriptionUseCase.execute(publicKey, "")
+                val response = getQueryActiveSubscriptionUseCase.execute(publicKey, deviceId)
+                Log.d("CryptoDebug", "Raw Response Object: $response")
 
                 withContext(Dispatchers.Main) {
                     if (response.success) {
-                        onResult(NowCryptoResult.Success(response.subscriptions))
+                        onResult(
+                            NowCryptoResult.Success(
+                                ActiveSubscriptionResult(
+                                    hasActiveSubscription = response.hasActiveSubscription,
+                                    subscriptions = response.subscriptions
+                                )
+                            )
+                        )
                     } else {
                         onResult(NowCryptoResult.Error(
                             message = response.message,
@@ -313,6 +320,7 @@ object NowCrypto {
                     }
                 }
             } catch (e: Exception) {
+                Log.e("CryptoDebug", "CRASH INSIDE COROUTINE!", e)
                 withContext(Dispatchers.Main) {
                     val errorMessage = if (e is retrofit2.HttpException) {
                         // Parse the JSON error body manually

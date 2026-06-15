@@ -9,15 +9,24 @@ class AuthInterceptor(
     private val sessionManager: SessionManager
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+
+        // If an Authorization header is ALREADY present (like secret key), skip adding the session token
+        if (originalRequest.header("Authorization") != null) {
+            return chain.proceed(originalRequest)
+        }
+
+        // Otherwise, fetch the session token for normal authenticated requests
         val token = runBlocking {
             sessionManager.getToken()
         }
 
-        val requestBuilder = chain.request().newBuilder()
+        val requestBuilder = originalRequest.newBuilder()
         if (!token.isNullOrEmpty()) {
-            requestBuilder.addHeader("Authorization", "Bearer $token")
+            // Use .header() instead of .addHeader() as a safety measure to ensure uniqueness
+            requestBuilder.header("Authorization", "Bearer $token")
         }
-        
+
         return chain.proceed(requestBuilder.build())
     }
 }
