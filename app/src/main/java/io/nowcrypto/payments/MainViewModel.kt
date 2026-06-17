@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import io.nowcrypto.library.NowCrypto
-import io.nowcrypto.library.data.NowCryptoResult
-import io.nowcrypto.library.remote.payment_status.PaymentStatusResponse
-import io.nowcrypto.library.remote.subscription.ActiveSubscriptionResult
-import io.nowcrypto.library.remote.subscription.NowCryptoSubscriptionItem
+import io.nowcrypto.sdk.NowCrypto
+import io.nowcrypto.sdk.NowCryptoListener
+import io.nowcrypto.sdk.remote.payment_status.PaymentStatusResponse
+import io.nowcrypto.sdk.remote.subscription.ActiveSubscriptionResult
+import io.nowcrypto.sdk.remote.subscription.NowCryptoSubscriptionItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -71,23 +71,21 @@ class MainViewModel : ViewModel() {
         // Initialize the library singleton
         NowCrypto.init(activePublicKey)
 
-        // Fetch Currencies
-        NowCrypto.getSupportedCurrencies(context) { result ->
-            isLoading = false
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    supportedCurrencies.clear()
-                    supportedCurrencies.addAll(result.data)
-                    isInitialized = true
-                }
-                is NowCryptoResult.Error -> {
-                    notifMessage = result.message
-                    isInitialized = false
-                }
-
-                is NowCryptoResult.Loading -> {}
+        // Fetch Currencies using the Listener pattern
+        NowCrypto.getSupportedCurrencies(context, object : NowCryptoListener<List<String>> {
+            override fun onSuccess(data: List<String>) {
+                isLoading = false
+                supportedCurrencies.clear()
+                supportedCurrencies.addAll(data)
+                isInitialized = true
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+                isInitialized = false
+            }
+        })
     }
 
     fun generatePaymentRequestToken(
@@ -101,21 +99,17 @@ class MainViewModel : ViewModel() {
         isLoading = true
         notifMessage = null
 
-        // Fetch Currencies
-        NowCrypto.getPaymentRequestToken(context, activeSecretKey, amount, currency, network) { result ->
-            isLoading = false
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    _paymentRequestToken.value = result.data
-                }
-                is NowCryptoResult.Error -> {
-                    notifMessage = result.message
-                    isInitialized = false
-                }
-
-                is NowCryptoResult.Loading -> {}
+        NowCrypto.getPaymentRequestToken(context, activeSecretKey, amount, currency, network, object : NowCryptoListener<String> {
+            override fun onSuccess(data: String) {
+                isLoading = false
+                _paymentRequestToken.value = data
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+            }
+        })
     }
 
     fun generateSubscriptionRequestToken(
@@ -129,21 +123,17 @@ class MainViewModel : ViewModel() {
         isLoading = true
         notifMessage = null
 
-        // Fetch Currencies
-        NowCrypto.getSubscriptionRequestToken(context, activeSecretKey, amount, currency, network, _subId.value!!) { result ->
-            isLoading = false
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    _paymentRequestToken.value = result.data
-                }
-                is NowCryptoResult.Error -> {
-                    notifMessage = result.message
-                    isInitialized = false
-                }
-
-                is NowCryptoResult.Loading -> {}
+        NowCrypto.getSubscriptionRequestToken(context, activeSecretKey, amount, currency, network, _subId.value!!, object : NowCryptoListener<String> {
+            override fun onSuccess(data: String) {
+                isLoading = false
+                _paymentRequestToken.value = data
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+            }
+        })
     }
 
     fun getSubscriptionList(context: Context, onError: () -> Unit) {
@@ -152,67 +142,56 @@ class MainViewModel : ViewModel() {
         isLoading = true
         notifMessage = null
 
-        NowCrypto.getSubscriptionList(context) { result ->
-            isLoading = false
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    _subscriptionList.value = result.data
-                }
-                is NowCryptoResult.Error -> {
-                    // Set the error message for the SnackBar
-                    notifMessage = result.message
-                    _subscriptionList.value = null
-                    // Trigger the callback to uncheck the box in the UI
-                    onError()
-                }
-                is NowCryptoResult.Loading -> {}
+        NowCrypto.getSubscriptionList(context, object : NowCryptoListener<List<NowCryptoSubscriptionItem>> {
+            override fun onSuccess(data: List<NowCryptoSubscriptionItem>) {
+                isLoading = false
+                _subscriptionList.value = data
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+                _subscriptionList.value = null
+                onError()
+            }
+        })
     }
 
     fun getPaymentStatus(context: Context, onError: () -> Unit) {
-
         isLoading = true
         notifMessage = null
 
-        // We pass both, the API will handle whichever is available
-        NowCrypto.getPaymentStatus(context, paymentRequestToken.value, _trxId.value) { result ->
-            isLoading = false
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    _paymentStatus.value = result.data
-                }
-                is NowCryptoResult.Error -> {
-                    notifMessage = result.message
-                    _paymentStatus.value = null
-                    onError()
-                }
-                is NowCryptoResult.Loading -> {}
+        NowCrypto.getPaymentStatus(context, paymentRequestToken.value, _trxId.value, object : NowCryptoListener<PaymentStatusResponse> {
+            override fun onSuccess(data: PaymentStatusResponse) {
+                isLoading = false
+                _paymentStatus.value = data
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+                _paymentStatus.value = null
+                onError()
+            }
+        })
     }
 
     fun getActiveSubscription(context: Context, onError: () -> Unit) {
-
         isLoading = true
         notifMessage = null
 
-        NowCrypto.queryActiveSubscription(context) { result ->
-            isLoading = false
-
-            when (result) {
-                is NowCryptoResult.Success -> {
-                    _activeSubscriptionResult.value = result.data
-                }
-
-                is NowCryptoResult.Error -> {
-                    notifMessage = result.message
-                    _activeSubscriptionResult.value = null
-                    onError()
-                }
-
-                is NowCryptoResult.Loading -> {}
+        NowCrypto.queryActiveSubscription(context, object : NowCryptoListener<ActiveSubscriptionResult> {
+            override fun onSuccess(data: ActiveSubscriptionResult) {
+                isLoading = false
+                _activeSubscriptionResult.value = data
             }
-        }
+
+            override fun onError(message: String) {
+                isLoading = false
+                notifMessage = message
+                _activeSubscriptionResult.value = null
+                onError()
+            }
+        })
     }
 }

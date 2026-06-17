@@ -22,9 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.nowcrypto.library.NowCrypto
-import io.nowcrypto.library.PaymentResultListener
-import io.nowcrypto.library.remote.subscription.NowCryptoSubscriptionItem
+import io.nowcrypto.sdk.NowCrypto
+import io.nowcrypto.sdk.PaymentResultListener
+import io.nowcrypto.sdk.remote.subscription.NowCryptoSubscriptionItem
 import io.nowcrypto.payments.ui.theme.NowCryptoPaymentsTheme
 import java.util.Locale.getDefault
 

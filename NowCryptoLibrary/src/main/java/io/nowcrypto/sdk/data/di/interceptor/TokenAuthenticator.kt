@@ -1,0 +1,22 @@
+package io.nowcrypto.sdk.data.di.interceptor
+
+import io.nowcrypto.sdk.data.session.SessionManager
+import kotlinx.coroutines.runBlocking
+import okhttp3.Authenticator
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.Route
+
+class TokenAuthenticator(
+    private val sessionManager: SessionManager
+) : Authenticator {
+    override fun authenticate(route: Route?, response: Response): Request? {
+        // Token is invalid/expired > clear it
+        runBlocking {
+            sessionManager.clearSession()
+        }
+        // Returning null means: do not retry automatically
+        // The failed response is passed back
+        return null
+    }
+}

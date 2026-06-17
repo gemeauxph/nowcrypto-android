@@ -1,4 +1,4 @@
-package io.nowcrypto.library
+package io.nowcrypto.sdk
 
 import org.junit.Test
 

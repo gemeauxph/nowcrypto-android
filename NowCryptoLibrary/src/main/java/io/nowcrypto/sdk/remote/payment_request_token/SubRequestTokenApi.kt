@@ -1,0 +1,13 @@
+package io.nowcrypto.sdk.remote.payment_request_token
+
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.POST
+
+interface SubRequestTokenApi {
+    @POST("payment/request/subscription/create")
+    suspend fun getSubscriptionRequestToken(
+        @Header("Authorization") authHeader: String,
+        @Body request: SubRequestTokenRequest
+    ): SubRequestTokenResponse
+}

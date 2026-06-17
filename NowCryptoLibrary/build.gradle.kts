@@ -1,16 +1,20 @@
+//plugins {
+//    id("com.android.library") version "8.13.2"
+//    id("org.jetbrains.kotlin.android") version "2.1.0"
+//    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+//    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+//}
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp")
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
 }
 
-
 android {
-    namespace = "io.nowcrypto.library"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "io.nowcrypto.sdk"
+    compileSdk = 35 // Standardized to stable API 35
 
     defaultConfig {
         minSdk = 24
@@ -35,52 +39,51 @@ android {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-    }
+    jvmToolchain(11)
+    //explicitApi()
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // Standard Android Libraries
+    implementation("androidx.core:core-ktx:1.12.0") // Downgraded slightly for better compatibility
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0") // More stable base
 
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.runtime.livedata)
-    implementation(libs.androidx.navigation.compose)
+    // Compose - Changed to a 2024 BOM for maximum compatibility
+    implementation(platform("androidx.compose:compose-bom:2024.04.01"))
+    implementation("androidx.activity:activity-compose:1.8.2") // Matches 2024 BOM better
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.runtime:runtime-livedata")
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation(libs.androidx.compose.material.icons.extended)
+    // NAVIGATION WARNING: For an SDK, it's best to manage screens manually.
+    // If you keep this, use a more compatible version:
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    // Retrofit (type-safe HTTP client built on OkHttp)
-    implementation(libs.retrofit)
+    implementation("androidx.compose.material:material-icons-extended")
 
-    // Converter for JSON (Moshi or Gson — pick one)
-    implementation(libs.converter.moshi)
-    implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
-    ksp(libs.moshi.kotlin.codegen)
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // OkHttp (low-level HTTP client)
-    implementation(libs.okhttp)
+    // Retrofit & Network
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0") // 5.x is still alpha/beta, 4.12 is safer for SDKs
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Optional: OkHttp logging interceptor (great for debugging requests/responses)
-    implementation(libs.logging.interceptor)
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") // Matches older Kotlin better
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
 
-    implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    implementation(libs.androidx.datastore.preferences)
-
-    //AsyncImage
-    implementation(libs.coil.compose)
+    // Coil for Images
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }

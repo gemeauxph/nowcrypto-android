@@ -1,0 +1,13 @@
+package io.nowcrypto.sdk.data.di.payment
+
+import io.nowcrypto.sdk.remote.payment.PaymentResponse
+
+interface PaymentRepository {
+    suspend fun payViaCrypto(deviceId: String, apiKey: String, paymentRequestToken: String): PaymentResponse
+    suspend fun payViaTransactionId(
+        deviceId: String,
+        publicKey: String,
+        transactionId: String,
+        paymentRequestToken: String
+    ): PaymentResponse
+}
