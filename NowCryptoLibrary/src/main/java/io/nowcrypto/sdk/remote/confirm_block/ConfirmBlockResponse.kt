@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 data class ConfirmBlockResponse(
     val success: Boolean,
     val confirmations: Int,
-    val status: String?,
+    val status: String? = null,
     val message: String?
 )

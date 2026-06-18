@@ -21,7 +21,7 @@ data class QueryActiveSubscriptionResponse(
 @Serializable
 data class NowCryptoSubscription(
     @SerialName("trx_id")
-    val trxId: String?,
+    val trxId: String? = null,
 
     val status: String,
     val expiration: String

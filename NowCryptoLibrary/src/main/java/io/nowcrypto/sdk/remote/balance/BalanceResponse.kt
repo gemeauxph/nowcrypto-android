@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Keep
 @Serializable
 data class BalanceResponse(
-    val success: Boolean?,
+    val success: Boolean? = null,
     val message: String,
-    val balance: String?,
+    val balance: String? = null,
 )

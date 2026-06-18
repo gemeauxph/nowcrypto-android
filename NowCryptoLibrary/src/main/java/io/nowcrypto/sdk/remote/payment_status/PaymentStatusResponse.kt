@@ -19,7 +19,7 @@ data class PaymentStatusResponse(
 data class SubscriptionData(
     @SerialName("trx_id") val trxId: String,
     val status: String,
-    val expiration: String?,
+    val expiration: String? = null,
     val amount: String,
     val currency: String
 )

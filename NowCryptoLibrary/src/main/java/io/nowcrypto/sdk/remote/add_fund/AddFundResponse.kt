@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 data class AddFundResponse(
     val success: Boolean,
     val message: String,
-    val status: String?,
+    val status: String? = null,
 )

@@ -8,6 +8,6 @@ import kotlinx.serialization.Serializable
 data class PaymentResponse(
     val success: Boolean,
     val message: String,
-    val trxId: String?,
+    val trxId: String? = null,
     val status: String?
 )
