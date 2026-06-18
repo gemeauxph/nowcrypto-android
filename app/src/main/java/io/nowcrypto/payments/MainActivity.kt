@@ -203,11 +203,14 @@ fun PaymentRequestScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Network") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isNetworkExpanded) },
-                            modifier = Modifier.menuAnchor(
-                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                enabled = true
-                            ).fillMaxWidth()
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = isNetworkExpanded
+                                )
+                            },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
                         )
                         ExposedDropdownMenu(
                             expanded = isNetworkExpanded,
@@ -240,11 +243,12 @@ fun PaymentRequestScreen(
                                 onValueChange = {},
                                 readOnly = true,
                                 label = { Text("CCY") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCurrencyExpanded) },
-                                modifier = Modifier.menuAnchor(
-                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                    enabled = true
-                                )
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = isCurrencyExpanded
+                                    )
+                                },
+                                modifier = Modifier.menuAnchor()
                             )
                             ExposedDropdownMenu(
                                 expanded = isCurrencyExpanded,
@@ -304,12 +308,11 @@ fun PaymentRequestScreen(
                                 readOnly = true,
                                 label = { Text("Select Plan") },
                                 trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isSubDropdownExpanded)
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = isSubDropdownExpanded
+                                    )
                                 },
-                                modifier = Modifier.menuAnchor(
-                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                    enabled = true
-                                )
+                                modifier = Modifier.menuAnchor()
                             )
 
                             ExposedDropdownMenu(

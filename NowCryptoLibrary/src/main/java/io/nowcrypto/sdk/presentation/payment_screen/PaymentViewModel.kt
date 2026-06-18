@@ -246,6 +246,7 @@ class PaymentViewModel(
             _paymentUiState.value = PaymentUiState.RegisterDeviceError("Network error: ${e.localizedMessage}")
 
         } catch (e: Exception) {
+            Log.e("CryptoDebug", e.toString())
             _paymentUiState.value = PaymentUiState.RegisterDeviceError("Unexpected error: ${e.localizedMessage}")
         }
     }

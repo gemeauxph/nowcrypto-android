@@ -47,22 +47,17 @@ fun PaymentScreen(
         }
     }
 
-    // Observe the state so the Composable reacts to changes
-    val isGuest by viewModel.isGuest.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Use isGuest as a key so the effect restarts/stops when status changes
-    LaunchedEffect(isGuest) {
-        // Only run polling if the user is NOT a guest
-        if (!isGuest) {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Initial check
-                viewModel.updateGuestStatus()
+    LaunchedEffect(Unit) {
 
-                // Polling loop
+        // This block repeats ONLY when the lifecycle is STARTED (app is visible)
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.updateGuestStatus()
+            if (!viewModel.isGuest.value) {
                 while (true) {
                     viewModel.startFetchingBalance()
-                    delay(5000)
+                    delay(5000) // Wait 5 seconds before next fetch
                 }
             }
         }
