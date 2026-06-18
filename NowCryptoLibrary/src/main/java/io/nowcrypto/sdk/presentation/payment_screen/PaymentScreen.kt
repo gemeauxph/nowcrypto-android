@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -47,13 +47,19 @@ fun PaymentScreen(
         }
     }
 
+    // Observe the state so the Composable reacts to changes
+    val isGuest by viewModel.isGuest.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val isGuest by viewModel.isGuest.collectAsState()
-
-    LaunchedEffect(isGuest) { // Restarts if guest status changes
+    // Use isGuest as a key so the effect restarts/stops when status changes
+    LaunchedEffect(isGuest) {
+        // Only run polling if the user is NOT a guest
         if (!isGuest) {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Initial check
+                viewModel.updateGuestStatus()
+
+                // Polling loop
                 while (true) {
                     viewModel.startFetchingBalance()
                     delay(5000)

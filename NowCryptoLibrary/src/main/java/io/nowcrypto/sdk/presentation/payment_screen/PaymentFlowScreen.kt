@@ -1,5 +1,6 @@
 package io.nowcrypto.sdk.presentation.payment_screen
 
+import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -63,7 +64,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -93,14 +95,12 @@ import io.nowcrypto.sdk.presentation.ui.theme.TertiaryTextColor
 import io.nowcrypto.sdk.presentation.ui.theme.White
 import io.nowcrypto.sdk.presentation.ui.theme.TextColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 import android.graphics.BitmapFactory
 import android.util.Base64
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.text.AnnotatedString
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PaymentFlowScreen(
     viewModel: PaymentViewModel,
@@ -119,7 +119,8 @@ fun PaymentFlowScreen(
     val userName by viewModel.userName.collectAsState()
     val profilePictureUrl by viewModel.profilePictureUrl.collectAsState()
 
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     var showQrDialog by remember { mutableStateOf(false) }
 
@@ -422,9 +423,10 @@ fun PaymentFlowScreen(
                 // Copy Button
                 IconButton(
                     onClick = {
-                        viewModel.walletAddress?.let { address ->
-                            clipboardManager.setText(AnnotatedString(address))
-                            Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                        val clipData = ClipData.newPlainText("wallet_address", viewModel.walletAddress)
+                        Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipEntry(clipData))
                         }
                     },
                     modifier = Modifier.size(32.dp)
