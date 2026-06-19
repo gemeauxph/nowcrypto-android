@@ -75,6 +75,7 @@ object NowCrypto {
     /**
     * Fetch supported currencies using the initialized API Key.
     */
+    @JvmSynthetic
     @JvmStatic
     fun getSupportedCurrencies(
         context: Context,
@@ -132,7 +133,6 @@ object NowCrypto {
         }
     }
 
-    @JvmSynthetic
     @JvmStatic
     fun getSupportedCurrencies(
         context: Context,
@@ -150,6 +150,7 @@ object NowCrypto {
     /**
      * Generate payment request token
      */
+    @JvmSynthetic
     @JvmStatic
     fun getPaymentRequestToken(
         context: Context,
@@ -199,7 +200,6 @@ object NowCrypto {
         }
     }
 
-    @JvmSynthetic
     @JvmStatic
     fun getPaymentRequestToken(
         context: Context,
@@ -295,6 +295,7 @@ object NowCrypto {
     /**
      * Get subscription list
      */
+    @JvmSynthetic
     @JvmStatic
     fun getSubscriptionList(
         context: Context,
@@ -348,7 +349,6 @@ object NowCrypto {
         }
     }
 
-    @JvmSynthetic
     @JvmStatic
     fun getSubscriptionList(
         context: Context,
@@ -367,6 +367,7 @@ object NowCrypto {
     /**
      * Get subscription list
      */
+    @JvmSynthetic
     @JvmStatic
     fun queryActiveSubscription(
         context: Context,
@@ -433,7 +434,6 @@ object NowCrypto {
         }
     }
 
-    @JvmSynthetic
     @JvmStatic
     fun queryActiveSubscription(
         context: Context,
@@ -452,6 +452,7 @@ object NowCrypto {
     /**
      * Get payment status
      */
+    @JvmSynthetic
     @JvmStatic
     @JvmOverloads
     fun getPaymentStatus(
@@ -501,7 +502,6 @@ object NowCrypto {
         }
     }
 
-    @JvmSynthetic
     @JvmStatic
     @JvmOverloads
     fun getPaymentStatus(
